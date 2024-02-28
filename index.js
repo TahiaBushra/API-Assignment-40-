@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
-// Express API
+// Express app
 const app = express();
 
 // Middlewares
@@ -17,6 +17,11 @@ app.get("/", (req, res) => {
     message: "Welcome to our server",
   });
 });
+
+// Routes
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", userRouter);
+app.use("/api/v1/books", bookRouter);
 
 // Port
 const port = process.env.PORT || 8080;
