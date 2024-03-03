@@ -18,7 +18,7 @@ const createBook = async (req, res) => {
       description,
     });
 
-    res.status(201).json(book);
+    res.status(201).json({ book, message: "A new book created!" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
