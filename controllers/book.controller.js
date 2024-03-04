@@ -29,7 +29,7 @@ const createBook = async (req, res) => {
 // Get All Books
 const getAllBooks = async (req, res) => {
   try {
-    const books = await bookModel.find({});
+    const books = await bookModel.find({}).populate("user").exec();
     res.status(200).json(books);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -45,7 +45,7 @@ const getABook = async (req, res) => {
       throw new Error("Invalid book id");
     }
 
-    const book = await bookModel.findById(bookid);
+    const book = await bookModel.findById(bookid).populate("user").exec();
 
     if (!book) {
       throw new Error("Book not found");
@@ -62,6 +62,7 @@ const updateABook = async (req, res) => {
   try {
     const { bookid } = req.params;
     const { title, image, author, genre, description } = req.body;
+    const userId = req.user?._id;
 
     if (!mongoose.Types.ObjectId.isValid(bookid)) {
       throw new Error("Invalid book id");
@@ -71,6 +72,10 @@ const updateABook = async (req, res) => {
 
     if (!book) {
       throw new Error("Book not found");
+    }
+
+    if (book.user.toString() !== userId.toString()) {
+      throw new Error("Forbidden");
     }
 
     const updatedBook = await bookModel.findByIdAndUpdate(
@@ -89,12 +94,23 @@ const updateABook = async (req, res) => {
 const deleteABook = async (req, res) => {
   try {
     const { bookid } = req.params;
+    const userId = req.user?._id;
 
     if (!mongoose.Types.ObjectId.isValid(bookid)) {
       throw new Error("Invalid book id");
     }
 
-    const book = await bookModel.findByIdAndDelete(bookid);
+    const book = await bookModel.findById(bookid);
+
+    if (!book) {
+      throw new Error("Book not found");
+    }
+
+    if (book.user.toString() !== userId.toString()) {
+      throw new Error("Forbidden");
+    }
+
+    await bookModel.findByIdAndDelete(bookid);
 
     res.status(200).json({ message: "Book deleted successfully!", book });
   } catch (error) {
