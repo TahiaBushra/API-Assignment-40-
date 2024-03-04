@@ -5,6 +5,7 @@ const bookModel = require("../models/book.model");
 const createBook = async (req, res) => {
   try {
     const { title, image, author, genre, description } = req.body;
+    const userId = req.user?._id;
 
     if (!title || !image || !author || !genre) {
       throw new Error("Title, image, author and genre fields are required");
@@ -16,6 +17,7 @@ const createBook = async (req, res) => {
       author,
       genre,
       description,
+      user: userId,
     });
 
     res.status(201).json({ book, message: "A new book created!" });
